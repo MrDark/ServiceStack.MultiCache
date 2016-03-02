@@ -4,57 +4,83 @@ using ServiceStack.Caching;
 
 namespace MultiCache
 {
+    /// <summary>
+    /// Caching wrapper to facilitate multiple caching layers.
+    /// Add multiple caching implementations which will be checked sequencial. If a caching value is
+    /// found in one of the higher level caches it will be automatically saved to the lower level caches.
+    /// </summary>
     public class MultiCache : ICacheClient
     {
         private MultiCacheConfiguration Configuration { get; }
 
+        /// <summary>
+        /// Ctor
+        /// </summary>
         internal MultiCache(MultiCacheConfiguration configuration)
         {
             Configuration = configuration;
         }
 
+        /// <summary>
+        /// Create new configuration to create MultiCache
+        /// </summary>
         public static MultiCacheConfiguration Configure()
         {
             return new MultiCacheConfiguration();
         }
 
-        public IDictionary<int, ICacheClient> GetCacheClients()
+        /// <summary>
+        /// Get dictionary of configured caching levels where key is level and value is caching level object
+        /// </summary>
+        public IDictionary<int, MultiCacheLevel> GetCacheLevels()
         {
-            return Configuration.GetCacheClients();
+            return Configuration.GetCacheLevels();
         }
 
         #region ServiceStack Interface
 
+        /// <summary>
+        /// ICacheClient - Dispose
+        /// </summary>
         public void Dispose()
         {
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                client.Dispose();
+                cacheLevel.Dispose();
             }
         }
 
+        /// <summary>
+        /// ICacheClient - Remove
+        /// </summary>
         public bool Remove(string key)
         {
             bool toReturn = false;
 
-            foreach (ICacheClient client in GetCacheClients().Values)
-            {
-                if (client.Remove(key))
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
+            { 
+                if (cacheLevel.Remove(key))
                     toReturn = true;
             }
 
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - RemoveAll
+        /// </summary>
         public void RemoveAll(IEnumerable<string> keys)
         {
             List<string> keysList = new List<string>(keys);
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                client.RemoveAll(keysList);
+                cacheLevel.RemoveAll(keysList);
             }
         }
 
+        /// <summary>
+        /// ICacheClient - Get
+        /// </summary>
         public T Get<T>(string key)
         {
             T toReturnValue = default(T);
@@ -63,7 +89,7 @@ namespace MultiCache
             int cacheLevel = -1;
 
             // Search for cache value
-            foreach (KeyValuePair<int, ICacheClient> entry in GetCacheClients())
+            foreach (KeyValuePair<int, MultiCacheLevel> entry in GetCacheLevels())
             {
                 if (firstCacheLevel == -1)
                     firstCacheLevel = entry.Key;
@@ -80,7 +106,7 @@ namespace MultiCache
             if (cacheLevel >= firstCacheLevel)
             {
                 // Write cache value to higher cache layers
-                foreach (KeyValuePair<int, ICacheClient> entry in GetCacheClients())
+                foreach (KeyValuePair<int, MultiCacheLevel> entry in GetCacheLevels())
                 {
                     if (entry.Key >= cacheLevel)
                     {
@@ -95,34 +121,43 @@ namespace MultiCache
             return toReturnValue;
         }
 
+        /// <summary>
+        /// ICacheClient - Increment
+        /// </summary>
         public long Increment(string key, uint amount)
         {
             long newAmount = 0;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                newAmount = client.Increment(key, amount);
+                newAmount = cacheLevel.Increment(key, amount);
             }
 
             return newAmount;
         }
 
+        /// <summary>
+        /// ICacheClient - Decrement
+        /// </summary>
         public long Decrement(string key, uint amount)
         {
             long newAmount = 0;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                newAmount = client.Decrement(key, amount);
+                newAmount = cacheLevel.Decrement(key, amount);
             }
 
             return newAmount;
         }
 
+        /// <summary>
+        /// ICacheClient - Add
+        /// </summary>
         public bool Add<T>(string key, T value)
         {
             bool toReturn = false;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                if (client.Add(key, value))
+                if (cacheLevel.Add(key, value))
                 {
                     toReturn = true;
                 }
@@ -131,12 +166,15 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Set
+        /// </summary>
         public bool Set<T>(string key, T value)
         {
             bool toReturn = false;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                if (client.Set(key, value))
+                if (cacheLevel.Set(key, value))
                 {
                     toReturn = true;
                 }
@@ -145,12 +183,15 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Replace
+        /// </summary>
         public bool Replace<T>(string key, T value)
         {
             bool toReturn = false;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                if (client.Replace(key, value))
+                if (cacheLevel.Replace(key, value))
                 {
                     toReturn = true;
                 }
@@ -159,12 +200,15 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Add with expiration
+        /// </summary>
         public bool Add<T>(string key, T value, DateTime expiresAt)
         {
             bool toReturn = false;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                if (client.Add(key, value, expiresAt))
+                if (cacheLevel.Add(key, value, expiresAt))
                 {
                     toReturn = true;
                 }
@@ -173,12 +217,15 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Set with expiration
+        /// </summary>
         public bool Set<T>(string key, T value, DateTime expiresAt)
         {
             bool toReturn = false;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                if (client.Set(key, value, expiresAt))
+                if (cacheLevel.Set(key, value, expiresAt))
                 {
                     toReturn = true;
                 }
@@ -187,12 +234,15 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Replace with expiration
+        /// </summary>
         public bool Replace<T>(string key, T value, DateTime expiresAt)
         {
             bool toReturn = false;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                if (client.Replace(key, value, expiresAt))
+                if (cacheLevel.Replace(key, value, expiresAt))
                 {
                     toReturn = true;
                 }
@@ -201,12 +251,15 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Add with expiration
+        /// </summary>
         public bool Add<T>(string key, T value, TimeSpan expiresIn)
         {
             bool toReturn = false;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                if (client.Add(key, value, expiresIn))
+                if (cacheLevel.Add(key, value, expiresIn))
                 {
                     toReturn = true;
                 }
@@ -215,12 +268,15 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Set with expiration
+        /// </summary>
         public bool Set<T>(string key, T value, TimeSpan expiresIn)
         {
             bool toReturn = false;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                if (client.Set(key, value, expiresIn))
+                if (cacheLevel.Set(key, value, expiresIn))
                 {
                     toReturn = true;
                 }
@@ -229,12 +285,15 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Replace with expiration
+        /// </summary>
         public bool Replace<T>(string key, T value, TimeSpan expiresIn)
         {
             bool toReturn = false;
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                if (client.Replace(key, value, expiresIn))
+                if (cacheLevel.Replace(key, value, expiresIn))
                 {
                     toReturn = true;
                 }
@@ -243,27 +302,40 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - FlushAll
+        /// </summary>
         public void FlushAll()
         {
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                client.FlushAll();
+                cacheLevel.FlushAll();
             }
         }
 
+        /// <summary>
+        /// ICacheClient - GetAll
+        /// </summary>
         public IDictionary<string, T> GetAll<T>(IEnumerable<string> keys)
         {
             List<string> keysList = new List<string>(keys);
 
             Dictionary<string, T> toReturn = new Dictionary<string, T>();
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                IDictionary<string, T> dict = client.GetAll<T>(keysList);
-                foreach (KeyValuePair<string, T> entry in dict)
+                IDictionary<string, T> dict = cacheLevel.GetAll<T>(keysList);
+                if (toReturn.Count == 0)
                 {
-                    if (!toReturn.ContainsKey(entry.Key))
+                    toReturn = new Dictionary<string, T>(dict);
+                }
+                else
+                {
+                    foreach (KeyValuePair<string, T> entry in dict)
                     {
-                        toReturn.Add(entry.Key, entry.Value);
+                        if (!toReturn.ContainsKey(entry.Key))
+                        {
+                            toReturn.Add(entry.Key, entry.Value);
+                        }
                     }
                 }
             }
@@ -271,11 +343,14 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - SetAll
+        /// </summary>
         public void SetAll<T>(IDictionary<string, T> values)
         {
-            foreach (ICacheClient client in GetCacheClients().Values)
+            foreach (MultiCacheLevel cacheLevel in GetCacheLevels().Values)
             {
-                client.SetAll(values);
+                cacheLevel.SetAll(values);
             }
         }
 

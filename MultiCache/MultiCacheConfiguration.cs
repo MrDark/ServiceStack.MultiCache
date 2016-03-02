@@ -7,7 +7,7 @@ namespace MultiCache
 {
     public class MultiCacheConfiguration
     {
-        private readonly SortedDictionary<int, ICacheClient> cachingClients = new SortedDictionary<int, ICacheClient>();
+        private readonly SortedDictionary<int, MultiCacheLevel> cachingLevels = new SortedDictionary<int, MultiCacheLevel>();
 
         /// <summary>
         /// Internal constructor so configuration can only be made via <see cref="MultiCache.Configure"/>
@@ -17,11 +17,40 @@ namespace MultiCache
         }
 
         /// <summary>
-        /// Gets a dictionary of all configured cache clients and levels
+        /// Gets a dictionary of all configured caching levels
         /// </summary>
-        internal IDictionary<int, ICacheClient> GetCacheClients()
+        internal IDictionary<int, MultiCacheLevel> GetCacheLevels()
         {
-            return cachingClients;
+            return cachingLevels;
+        }
+
+        /// <summary>
+        /// Add new cache client with a set priority. The lower the level the higher the cache client its priority.
+        /// </summary>
+        /// <param name="level">Must be equal or greater than 0</param>
+        /// <param name="cacheClients">One or more caching implentations to add for this level</param>
+        /// <returns></returns>
+        public MultiCacheConfiguration AddCacheLevel(int level, params ICacheClient[] cacheClients)
+        {
+            if (cacheClients == null)
+            {
+                throw new ArgumentNullException(nameof(cacheClients));
+            }
+            if (level < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(level), "Caching level has to be equal or greater than 0.");
+            }
+
+            MultiCacheLevel cacheLevel;
+            if (!cachingLevels.TryGetValue(level, out cacheLevel))
+            {
+                cacheLevel = new MultiCacheLevel(level);
+                cachingLevels.Add(cacheLevel.Level, cacheLevel);
+            }
+
+            cacheLevel.AddCacheClient(cacheClients);
+
+            return this;
         }
 
         /// <summary>
@@ -30,31 +59,12 @@ namespace MultiCache
         public MultiCacheConfiguration AddCacheLevel(ICacheClient cacheClient)
         {
             int nextLevel = 0;
-            if (cachingClients.Count > 0)
-                nextLevel = cachingClients.Keys.Max() + 1;
-
-            cachingClients.Add(nextLevel, cacheClient);
-
-            return this;
-        }
-
-        /// <summary>
-        /// Add new cache client with a set priority. The lower the level the higher the cache client its priority.
-        /// </summary>
-        /// <param name="level">Must be equal or greater than 0</param>
-        /// <param name="cacheClient"></param>
-        public MultiCacheConfiguration AddCacheLevel(int level, ICacheClient cacheClient)
-        {
-            if (level < 0)
+            if (cachingLevels.Count > 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(level), "Caching level has to be equal or greater than 0.");
-            }
-            if (cachingClients.ContainsKey(level))
-            {
-                throw new ArgumentException(nameof(level), $"CacheClient with level '{level}' already exists.");
+                nextLevel = cachingLevels.Keys.Max() + 1;
             }
 
-            cachingClients.Add(level, cacheClient);
+            AddCacheLevel(nextLevel, cacheClient);
 
             return this;
         }
@@ -62,7 +72,7 @@ namespace MultiCache
         /// <summary>
         /// Create new MultiCache instance with current configuration.
         /// </summary>
-        public MultiCache Finish()
+        public MultiCache Create()
         {
             return new MultiCache(this);
         }

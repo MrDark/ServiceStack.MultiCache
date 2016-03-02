@@ -16,14 +16,14 @@ namespace MultiCache.Test
                                               .AddCacheLevel(new DummyCacheClient(0))
                                               .AddCacheLevel(new DummyCacheClient(1))
                                               .AddCacheLevel(new DummyCacheClient(2))
-                                              .Finish();
+                                              .Create();
 
-            IDictionary<int, ICacheClient> cachingClients = multiCache.GetCacheClients();
-            foreach (KeyValuePair<int, ICacheClient> client in cachingClients)
+            IDictionary<int, MultiCacheLevel> cachingClients = multiCache.GetCacheLevels();
+            foreach (KeyValuePair<int, MultiCacheLevel> entry in cachingClients)
             {
-                DummyCacheClient dummyClient = (DummyCacheClient)client.Value;
+                DummyCacheClient dummyClient = (DummyCacheClient)entry.Value.GetCacheClients()[0];
 
-                Assert.AreEqual(client.Key, dummyClient.Index);
+                Assert.AreEqual(entry.Key, dummyClient.Index);
             }
         }
 
@@ -34,25 +34,28 @@ namespace MultiCache.Test
                                               .AddCacheLevel(4, new DummyCacheClient(4))
                                               .AddCacheLevel(8, new DummyCacheClient(8))
                                               .AddCacheLevel(12, new DummyCacheClient(12))
-                                              .Finish();
+                                              .Create();
 
-            IDictionary<int, ICacheClient> cachingClients = multiCache.GetCacheClients();
-            foreach (KeyValuePair<int, ICacheClient> client in cachingClients)
+            IDictionary<int, MultiCacheLevel> cachingClients = multiCache.GetCacheLevels();
+            foreach (KeyValuePair<int, MultiCacheLevel> entry in cachingClients)
             {
-                DummyCacheClient dummyClient = (DummyCacheClient)client.Value;
+                DummyCacheClient dummyClient = (DummyCacheClient)entry.Value.GetCacheClients()[0];
 
-                Assert.AreEqual(client.Key, dummyClient.Index);
+                Assert.AreEqual(entry.Key, dummyClient.Index);
             }
         }
 
-        [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [Test]        
         public void AddCacheClientWithDuplicateLevel()
         {
-            MultiCache.Configure()
-                      .AddCacheLevel(new DummyCacheClient(0)) // 0
-                      .AddCacheLevel(new DummyCacheClient(1)) // 1
-                      .AddCacheLevel(1, new DummyCacheClient(2)); // 2, but insert as 1
+            MultiCache multiCache = MultiCache.Configure()
+                                              .AddCacheLevel(new DummyCacheClient(0)) // 0
+                                              .AddCacheLevel(new DummyCacheClient(1)) // 1
+                                              .AddCacheLevel(1, new DummyCacheClient(2)) // 2, but insert as 1
+                                              .Create();
+
+            ICacheClient[] clients = multiCache.GetCacheLevels()[1].GetCacheClients();
+            Assert.AreEqual(2, clients.Length);
         }
 
         [Test]

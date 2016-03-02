@@ -57,6 +57,7 @@
     <Compile Include="CachingTests.cs" />
     <Compile Include="Mocks\DummyCacheClient.cs" />
     <Compile Include="ConfigurationTests.cs" />
+    <Compile Include="Mocks\SlowCacheClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
