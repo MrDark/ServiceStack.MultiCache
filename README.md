@@ -1,4 +1,4 @@
-# MultiCache
+# Heading
 Caching wrapper to facilitate multiple caching layers. 
 
 Add multiple caching implementations which will be checked sequencial. If a caching value is found in one of the higher level caches it will be automatically saved to the lower level caches.
@@ -16,7 +16,6 @@ If you have cache clients which might be slow to respond - due to for example ne
     MultiCache multiCache = MultiCache.Configure()
                             .AddCacheLevel(new AzureCache(), new AmazonCache())
                             .Create()
-
 
 ### ServiceStack integration
 MultiCache implements and uses the `ServiceStack.Interfaces.ICacheClient` interface. This way it can be used like any other caching implmentation in ServiceStack and existing ServiceStack caching implementations can be used by MultiCache.
