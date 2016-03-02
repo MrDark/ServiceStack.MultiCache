@@ -64,5 +64,34 @@ namespace MultiCache.Test
         {
             MultiCache.Configure().AddCacheLevel(-1, new DummyCacheClient(1));
         }
+
+        [Test]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void AddDuplicateCacheClientForLevel()
+        {
+            DummyCacheClient cacheClient = new DummyCacheClient(0);
+
+            MultiCache.Configure()
+                      .AddCacheLevel(0,
+                                     cacheClient,
+                                     cacheClient)
+                      .Create();
+
+            MultiCache.Configure()
+                      .AddCacheLevel(cacheClient)
+                      .AddCacheLevel(0, cacheClient)
+                      .Create();
+
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void AddNullCacheClient()
+        {
+            MultiCache.Configure()
+                      .AddCacheLevel(null)
+                      .Create();
+
+        }
     }
 }

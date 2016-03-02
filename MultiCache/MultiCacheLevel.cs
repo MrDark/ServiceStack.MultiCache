@@ -28,17 +28,6 @@ namespace MultiCache
         }
 
         /// <summary>
-        /// Add cache client(s) to this caching level
-        /// </summary>
-        public void AddCacheClient(ICacheClient[] clients)
-        {
-            foreach (ICacheClient client in clients)
-            {
-                AddCacheClient(client);
-            }
-        }
-
-        /// <summary>
         /// Get IList of configured cache clients
         /// </summary>
         /// <returns></returns>
@@ -48,13 +37,34 @@ namespace MultiCache
         }
 
         /// <summary>
+        /// Add cache client(s) to this caching level
+        /// </summary>
+        public void AddCacheClient(ICacheClient[] clients)
+        {
+            if (clients == null)
+            {
+                throw new ArgumentNullException(nameof(clients));
+            }
+
+            foreach (ICacheClient client in clients)
+            {
+                AddCacheClient(client);
+            }
+        }
+
+        /// <summary>
         /// Add cache client to this caching level
         /// </summary>
         private void AddCacheClient(ICacheClient cacheClient)
         {
+            if (cacheClient == null)
+            {
+                throw new ArgumentNullException(nameof(cacheClient));
+            }
+
             if (CacheClients.Contains(cacheClient))
             {
-                throw new InvalidOperationException($"Caching level '{Level}' already contains a cache client '{cacheClient}'.");
+                throw new InvalidOperationException($"Caching level '{Level}'. Duplicate cache client '{cacheClient}'.");
             }
 
             CacheClients.Add(cacheClient);
