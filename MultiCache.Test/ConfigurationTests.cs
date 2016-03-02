@@ -89,7 +89,15 @@ namespace MultiCache.Test
         public void AddNullCacheClient()
         {
             MultiCache.Configure()
+                      .AddCacheLevel()
+                      .Create();
+
+            MultiCache.Configure()
                       .AddCacheLevel(null)
+                      .Create();
+
+            MultiCache.Configure()
+                      .AddCacheLevel(null, null)
                       .Create();
         }
     }
