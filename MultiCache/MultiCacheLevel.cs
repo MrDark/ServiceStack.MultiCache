@@ -39,10 +39,10 @@ namespace MultiCache
         }
 
         /// <summary>
-        /// Get IEnumerable of configured cache clients
+        /// Get IList of configured cache clients
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<ICacheClient> GetCacheClients()
+        public IList<ICacheClient> GetCacheClients()
         {
             return CacheClients.ToArray();
         }
@@ -98,6 +98,9 @@ namespace MultiCache
 
         #region ServiceStack ICacheClient Interface
 
+        /// <summary>
+        /// ICacheClient - Dispose
+        /// </summary>
         public void Dispose()
         {
             foreach (ICacheClient client in CacheClients)
@@ -106,6 +109,9 @@ namespace MultiCache
             }
         }
 
+        /// <summary>
+        /// ICacheClient - Remove
+        /// </summary>
         public bool Remove(string key)
         {
             bool toReturn = false;
@@ -119,6 +125,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - RemoveAll
+        /// </summary>
         public void RemoveAll(IEnumerable<string> keys)
         {
             List<string> keysList = new List<string>(keys);
@@ -129,6 +138,9 @@ namespace MultiCache
             }
         }
 
+        /// <summary>
+        /// ICacheClient - Get
+        /// </summary>
         public T Get<T>(string key)
         {
             T toReturnValue;
@@ -146,6 +158,9 @@ namespace MultiCache
             return toReturnValue;
         }
 
+        /// <summary>
+        /// ICacheClient - Increment
+        /// </summary>
         public long Increment(string key, uint amount)
         {
             long newAmount = 0;
@@ -159,6 +174,9 @@ namespace MultiCache
             return newAmount;
         }
 
+        /// <summary>
+        /// ICacheClient - Decrement
+        /// </summary>
         public long Decrement(string key, uint amount)
         {
             long newAmount = 0;
@@ -171,6 +189,9 @@ namespace MultiCache
             return newAmount;
         }
 
+        /// <summary>
+        /// ICacheClient - Add
+        /// </summary>
         public bool Add<T>(string key, T value)
         {
             bool toReturn = false;
@@ -186,6 +207,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Set
+        /// </summary>
         public bool Set<T>(string key, T value)
         {
             bool toReturn = false;
@@ -201,6 +225,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Replace
+        /// </summary>
         public bool Replace<T>(string key, T value)
         {
             bool toReturn = false;
@@ -215,6 +242,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Add
+        /// </summary>
         public bool Add<T>(string key, T value, DateTime expiresAt)
         {
             bool toReturn = false;
@@ -229,6 +259,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Set
+        /// </summary>
         public bool Set<T>(string key, T value, DateTime expiresAt)
         {
             bool toReturn = false;
@@ -243,6 +276,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Replace
+        /// </summary>
         public bool Replace<T>(string key, T value, DateTime expiresAt)
         {
             bool toReturn = false;
@@ -257,6 +293,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Add
+        /// </summary>
         public bool Add<T>(string key, T value, TimeSpan expiresIn)
         {
             bool toReturn = false;
@@ -271,6 +310,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Set
+        /// </summary>
         public bool Set<T>(string key, T value, TimeSpan expiresIn)
         {
             bool toReturn = false;
@@ -285,6 +327,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - Replace
+        /// </summary>
         public bool Replace<T>(string key, T value, TimeSpan expiresIn)
         {
             bool toReturn = false;
@@ -299,6 +344,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - FlushAll
+        /// </summary>
         public void FlushAll()
         {
             foreach (ICacheClient client in CacheClients)
@@ -307,6 +355,9 @@ namespace MultiCache
             }
         }
 
+        /// <summary>
+        /// ICacheClient - GetAll
+        /// </summary>
         public IDictionary<string, T> GetAll<T>(IEnumerable<string> keys)
         {
             List<string> keysList = new List<string>(keys);
@@ -327,6 +378,9 @@ namespace MultiCache
             return toReturn;
         }
 
+        /// <summary>
+        /// ICacheClient - SetAll
+        /// </summary>
         public void SetAll<T>(IDictionary<string, T> values)
         {
             foreach (ICacheClient client in CacheClients)

@@ -54,8 +54,8 @@ namespace MultiCache.Test
                                               .AddCacheLevel(1, new DummyCacheClient(2)) // 2, but insert as 1
                                               .Create();
 
-            ICacheClient[] clients = multiCache.GetCacheLevels()[1].GetCacheClients();
-            Assert.AreEqual(2, clients.Length);
+            IList<ICacheClient> clients = multiCache.GetCacheLevels()[1].GetCacheClients();
+            Assert.AreEqual(2, clients.Count);
         }
 
         [Test]
