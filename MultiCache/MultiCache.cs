@@ -6,7 +6,7 @@ namespace MultiCache
 {
     public class MultiCache : ICacheClient
     {
-        private MultiCacheConfiguration Configuration { get; set; }
+        private MultiCacheConfiguration Configuration { get; }
 
         internal MultiCache(MultiCacheConfiguration configuration)
         {
@@ -58,11 +58,16 @@ namespace MultiCache
         public T Get<T>(string key)
         {
             T toReturnValue = default(T);
+
+            int firstCacheLevel = -1;
             int cacheLevel = -1;
 
             // Search for cache value
             foreach (KeyValuePair<int, ICacheClient> entry in GetCacheClients())
             {
+                if (firstCacheLevel == -1)
+                    firstCacheLevel = entry.Key;
+
                 T value = entry.Value.Get<T>(key);
                 if (value != null && !value.Equals(toReturnValue))
                 {
@@ -72,7 +77,7 @@ namespace MultiCache
                 }
             }
 
-            if (cacheLevel >= 0)
+            if (cacheLevel >= firstCacheLevel)
             {
                 // Write cache value to higher cache layers
                 foreach (KeyValuePair<int, ICacheClient> entry in GetCacheClients())
