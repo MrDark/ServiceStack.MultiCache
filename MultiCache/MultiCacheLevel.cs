@@ -7,7 +7,7 @@ using ServiceStack.Caching;
 
 namespace MultiCache
 {
-    public class MultiCacheLevel : ICacheClient
+    public sealed class MultiCacheLevel : ICacheClient
     {
         /// <summary>
         /// Collection of ICacheClients for this caching level
@@ -39,7 +39,7 @@ namespace MultiCache
         /// <summary>
         /// Add cache client(s) to this caching level
         /// </summary>
-        public void AddCacheClient(ICacheClient[] clients)
+        internal void AddCacheClient(ICacheClient[] clients)
         {
             if (clients == null)
             {

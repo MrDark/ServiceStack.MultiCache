@@ -5,7 +5,7 @@ using ServiceStack.Caching;
 
 namespace MultiCache
 {
-    public class MultiCacheConfiguration
+    public sealed class MultiCacheConfiguration
     {
         private readonly SortedDictionary<int, MultiCacheLevel> cachingLevels = new SortedDictionary<int, MultiCacheLevel>();
 

@@ -6,10 +6,11 @@ namespace MultiCache
 {
     /// <summary>
     /// Caching wrapper to facilitate multiple caching layers.
+    /// 
     /// Add multiple caching implementations which will be checked sequencial. If a caching value is
     /// found in one of the higher level caches it will be automatically saved to the lower level caches.
     /// </summary>
-    public class MultiCache : ICacheClient
+    public sealed class MultiCache : ICacheClient
     {
         private MultiCacheConfiguration Configuration { get; }
 

@@ -91,7 +91,6 @@ namespace MultiCache.Test
             MultiCache.Configure()
                       .AddCacheLevel(null)
                       .Create();
-
         }
     }
 }
